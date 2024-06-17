@@ -1,28 +1,29 @@
 {
     "users": [
         {
-            "username": "arolland.eth",
-            "steam_id": "76561198850998389"
+            "username": "0xpayne",
+          "steam_id": "76561198850998389",
+          "ubisoft_id":  "Payne_Games"
         },
         {
-            "username": "Blake",
-            "steam_id": "76561198153410555"
+            "username": "blakebrins",
+          "steam_id": "76561198153410555",
+          "ubisoft_id":  "blakebrins"
         },
         {
-            "username": "Zachary",
-            "steam_id": "76561198989909183"
+            "username": "hzhu5",
+          "steam_id": "76561198327874233",
+          "ubisoft_id":  "hzhu12"
         },
         {
-            "username": "hzhu",
-            "steam_id": "76561198327874233"
+            "username": "danleb03",
+          "steam_id": "76561198125135420",
+          "ubisoft_id":  "tlvlt"
         },
-        {
-            "username": "Noah",
-            "steam_id": "76561198125135420"
-        },
-        {
-            "username": "tatertots2499",
-            "steam_id": "76561199060905379"
-        }
+      {
+        "username": "tatertots2499.",
+        "steam_id": "76561199060905379",
+        "ubisoft_id": "Zachtots2499"
+      }
     ]
 }
