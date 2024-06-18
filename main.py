@@ -75,11 +75,21 @@ async def stats(ctx):
     rank = rank_img.get('alt')
     
     #find KD through HTML parsing
-    kd_div = rank_body.find('KD', class_='stat-value stat-value--text')
+    kd_div = rank_body.find('span', class_='stat-value stat-value--text stat-table__value')
+    kd = kd_div.text.strip()
+    print(kd)
     
     
     rank_role = discord.utils.get(user.guild.roles, name=rank)
+
+    de_rank_name, rank_up_name = rank_change(rank_role)
     
+    de_rank_role = discord.utils.get(user.guild.roles, name=de_rank_name)
+    rank_up_role = discord.utils.get(user.guild.roles, name=rank_up_name)
+ 
+    
+    await user.remove_roles(de_rank_role)
+    await user.remove_roles(rank_up_role)
     await user.add_roles(rank_role)
     
 
@@ -91,7 +101,26 @@ async def stats(ctx):
     await ctx.send(file=file, embed=embed)
     
 
+async def rank_change(update_rank):
+    with open ("../csru/ranks.txt") as ranks_text:
+        rank_arr = ranks_text.readlines()
     
+    index = 0;
+    
+    for i in range(len(rank_arr)):
+        if(update_rank == rank_arr[i]):
+            index = i;
+    
+    de_rank = rank_arr[index + 1]
+    rank_up = rank_arr[index - 1]
+    
+    return de_rank, rank_up
+    
+
+
+    
+
+            
 
 
 bot.run(TOKEN)
