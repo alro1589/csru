@@ -82,14 +82,7 @@ async def stats(ctx):
     
     rank_role = discord.utils.get(user.guild.roles, name=rank)
 
-    de_rank_name, rank_up_name = rank_change(rank_role)
-    
-    de_rank_role = discord.utils.get(user.guild.roles, name=de_rank_name)
-    rank_up_role = discord.utils.get(user.guild.roles, name=rank_up_name)
- 
-    
-    await user.remove_roles(de_rank_role)
-    await user.remove_roles(rank_up_role)
+    await rank_change(user, rank)
     await user.add_roles(rank_role)
     
 
@@ -101,20 +94,33 @@ async def stats(ctx):
     await ctx.send(file=file, embed=embed)
     
 
-async def rank_change(update_rank):
-    with open ("../csru/ranks.txt") as ranks_text:
-        rank_arr = ranks_text.readlines()
+async def rank_change(user, update_rank):
+    with open("../csru/ranks.txt") as ranks_text:
+    # Strip newline characters and create a clean list of ranks
+        rank_arr = [line.strip() for line in ranks_text.readlines()]
+
+# Find the index of the current rank in the list
+    if update_rank in rank_arr:
+        index = rank_arr.index(update_rank)
     
-    index = 0;
+    # Calculate the ranks immediately above and below the current rank, if they exist
+    de_rank = rank_arr[index + 1] if index < len(rank_arr) - 1 else None
+    rank_up = rank_arr[index - 1] if index > 0 else None
     
-    for i in range(len(rank_arr)):
-        if(update_rank == rank_arr[i]):
-            index = i;
+    # Remove roles for the ranks immediately above and below, if applicable
+    if de_rank:
+        de_rank_role = discord.utils.get(user.guild.roles, name=de_rank)
+        if de_rank_role:
+            await user.remove_roles(de_rank_role)
+    if rank_up:
+        rank_up_role = discord.utils.get(user.guild.roles, name=rank_up)
+        if rank_up_role:
+            await user.remove_roles(rank_up_role)
+            
     
-    de_rank = rank_arr[index + 1]
-    rank_up = rank_arr[index - 1]
     
-    return de_rank, rank_up
+
+
     
 
 
