@@ -85,7 +85,7 @@ async def stats(ctx):
     embed = discord.Embed(title='Rainbow Six Siege Stats', description=f'Stats for {ubisoftID}',url=rankURL,colour=discord.Colour.blue())
     embed.add_field(name="Rank:", value=rank)
     embed.add_field(name="KD:", value=kd)
-    embed.add_field(name="Win Rate:", value=winrate)
+    embed.add_field(name="Win Rate:", value=f'{winrate}%')
     
     file = discord.File(f"../csru/assets/R6S/{rank}.png", filename= "image.png")
     embed.set_thumbnail(url="attachment://image.png")
