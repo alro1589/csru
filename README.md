@@ -1,4 +1,4 @@
-﻿# csru
+﻿# Discord R6 Rank Bot
 Dependencies:
 - [Python 3.6](https://www.python.org/downloads/release/python-360/)
 - [pip](https://pypi.org/project/pip/)
