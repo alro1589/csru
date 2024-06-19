@@ -61,9 +61,10 @@ async def stats(ctx):
         if(user.name == usersData['users'][i]["username"]):
             ubisoftID = usersData['users'][i]['ubisoft_id']
     
-
-    rankURL = f'https://r6.tracker.network/r6siege/profile/ubi/{ubisoftID}/overview'
-    rankURL_req = requests.get(rankURL)
+    
+    rankURL = f'https://r6.tracker.network/r6siege/profile/ubi/{ubisoftID}'
+    await refresh_data(f'{rankURL}?forceCollect=true')
+    rankURL_req = requests.get(f'{rankURL}/overview')
     
     #find rank through HTML parsing
     rank_soup = BeautifulSoup(rankURL_req.content, 'html.parser')
@@ -148,11 +149,11 @@ async def grab_stats(soup):
         
 
 
-async def refresh(url):
-    rankURL_req = requests.get(url)
-    return rankURL_req
-
-            
+async def refresh_data(url):
+    response = requests.get(url)
+    print(f'Refreshing data for {url}')
+    print(response.status_code)
+    return response
 
 
 bot.run(TOKEN)
