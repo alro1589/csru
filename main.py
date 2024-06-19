@@ -47,8 +47,6 @@ async def h(ctx):
     await ctx.send(embed=embed)
 
 
-
-
 @bot.command(pass_context=True)
 async def stats(ctx):
     user = ctx.message.author
@@ -75,10 +73,8 @@ async def stats(ctx):
     rank = rank_img.get('alt')
     
     #find KD through HTML parsing
-    kd_div = rank_body.find('span', class_='stat-value stat-value--text stat-table__value')
-    kd = kd_div.text.strip()
-    print(kd)
     
+    kd, winrate = await grab_stats(rank_soup)
     
     rank_role = discord.utils.get(user.guild.roles, name=rank)
 
@@ -87,7 +83,10 @@ async def stats(ctx):
     
 
     embed = discord.Embed(title='Rainbow Six Siege Stats', description=f'Stats for {ubisoftID}',url=rankURL,colour=discord.Colour.blue())
-    embed.add_field(name="Rank:", value=rank, inline=False)
+    embed.add_field(name="Rank:", value=rank)
+    embed.add_field(name="KD:", value=kd)
+    embed.add_field(name="Win Rate:", value=winrate)
+    
     file = discord.File(f"../csru/assets/R6S/{rank}.png", filename= "image.png")
     embed.set_thumbnail(url="attachment://image.png")
     
@@ -99,7 +98,7 @@ async def rank_change(user, update_rank):
     # Strip newline characters and create a clean list of ranks
         rank_arr = [line.strip() for line in ranks_text.readlines()]
 
-# Find the index of the current rank in the list
+    # Find the index of the current rank in the list
     if update_rank in rank_arr:
         index = rank_arr.index(update_rank)
     
@@ -118,13 +117,40 @@ async def rank_change(user, update_rank):
             await user.remove_roles(rank_up_role)
             
     
-    
+async def grab_stats(soup):
+    kd_ratio = None
+    win_rate = None
+
+    # Find all spans for KD ratios and win rates
+    stat_spans = soup.find_all('span', class_='stat-value--text')
+
+    for stat_span in stat_spans:
+        # Check if the parent or preceding sibling contains specific text to identify the stat
+        stat_name_span = stat_span.find_previous_sibling('span', class_='stat-name')
+        if stat_name_span:
+            stat_name = stat_name_span.text.strip()
+            stat_value = stat_span.find('span').text.strip().rstrip('%')  # Remove '%' if present for win rate
+
+            if "KD" in stat_name:  # Adjust this condition based on how KD is labeled
+                try:
+                    kd_ratio = float(stat_value)
+                except ValueError:
+                    pass  # Ignore if conversion fails
+
+            elif "Win Rate" in stat_name:
+                try:
+                    win_rate = float(stat_value)
+                except ValueError:
+                    pass  # Ignore if conversion fails
+
+    # Return KD ratio and win rate
+    return kd_ratio, win_rate
+        
 
 
-    
-
-
-    
+async def refresh(url):
+    rankURL_req = requests.get(url)
+    return rankURL_req
 
             
 
