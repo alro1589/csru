@@ -203,8 +203,7 @@ async def play(ctx, *, song_name:str):
         await voice_client.move_to(channel)
 
     # Use YTDLSource to fetch the audio source
-    url = await search_song(song_name)    
-    print(url)
+    url = await search_song(song_name)
     player = await YTDLSource.from_url(url, stream=True)
     ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 
@@ -213,6 +212,7 @@ async def play(ctx, *, song_name:str):
 @bot.command(name='stop', help='Stops the song')
 async def stop(ctx):
     voice_client = ctx.message.guild.voice_client
+    await ctx.author.voice.channel.disconnect()
     if voice_client.is_playing():
         await voice_client.stop()
     else:
