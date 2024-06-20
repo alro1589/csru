@@ -3,6 +3,12 @@
 import os
 import re
 import json
+import sys
+
+sys.path.append('/Users/Alex/Source/Repos/csru')
+
+import asyncio
+
 
 from datetime import datetime, timedelta
 
@@ -14,10 +20,16 @@ from dotenv import load_dotenv
 import requests
 from bs4 import BeautifulSoup
 
+from music import YTDLSource, ffmpeg_options
+from googleapiclient.discovery import build
+
+
 #load discord token environment
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
+
+YOUTUBE_TOKEN = os.getenv('YOUTUBE_TOKEN')
 
 #create client instance
 intents = discord.Intents.default()
@@ -47,7 +59,7 @@ async def h(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(pass_context=True)
+@bot.command(name='stats', help='Fetch R6 Stats')
 async def stats(ctx):
     user = ctx.message.author
     
@@ -155,5 +167,68 @@ async def refresh_data(url):
     print(response.status_code)
     return response
 
+
+async def search_song(song_name):
+    youtube = build('youtube', 'v3', developerKey=YOUTUBE_TOKEN)
+
+    request = youtube.search().list(
+        q=song_name,
+        part="snippet",
+        maxResults=1,
+        type="video"
+    )
+    response = request.execute()
+
+    video_id = response['items'][0]['id']['videoId']
+    return f'https://www.youtube.com/watch?v={video_id}'
+
+#music commands
+@bot.command(name='play', help='Plays a song')
+async def play(ctx, *, song_name:str):
+  # Check if the command author is connected to a voice channel
+    if not ctx.author.voice:
+        await ctx.send("You are not connected to a voice channel.")
+        return
+
+    channel = ctx.author.voice.channel
+
+    # Check if the bot is already connected to a voice channel in the guild
+    voice_client = discord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
+
+    if voice_client is None:
+        # If the bot is not connected, connect to the author's voice channel
+        voice_client = await channel.connect()
+    elif voice_client.channel != channel:
+        # If the bot is connected to a different voice channel, move it to the author's channel
+        await voice_client.move_to(channel)
+
+    # Use YTDLSource to fetch the audio source
+    url = await search_song(song_name)    
+    print(url)
+    player = await YTDLSource.from_url(url, stream=True)
+    ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+
+    await ctx.send(f'Now playing: {player.title}')
+
+@bot.command(name='stop', help='Stops the song')
+async def stop(ctx):
+    voice_client = ctx.message.guild.voice_client
+    if voice_client.is_playing():
+        await voice_client.stop()
+    else:
+        await ctx.send("The bot is not playing anything at the moment.")
+        
+
+@bot.command()
+async def play_test(ctx):
+    if not ctx.author.voice:
+        await ctx.send("You are not connected to a voice channel.")
+        return
+
+    channel = ctx.author.voice.channel
+    voice_client = await channel.connect()
+
+    source = discord.FFmpegPCMAudio('C:/Users/Alex/source/repos/csru/rockstar.mp3', options=ffmpeg_options)
+    voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
 bot.run(TOKEN)
